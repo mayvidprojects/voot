@@ -49,7 +49,6 @@ print('\nVoot checker bot by Mayvid.')
 client = TelegramClient('bot', api_id, api_hash).start(bot_token=bot_token)
 @client.on(events.NewMessage)
 async def my_event_handler(event):
-    await client.send_message(owner, 'Bot is ready to use. \n Send me the combo file with caption /check.')
     if event.peer_id.user_id == owner and event.raw_text == '/check':
         await event.download_media("./"+'database.txt')
         data_holder = dict()
