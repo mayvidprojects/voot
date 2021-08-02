@@ -1,2 +1,2 @@
 # voot
-A Voot checker by Mayvid-projects,
+A Voot checker by Zero Checkers.
