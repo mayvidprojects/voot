@@ -54,8 +54,8 @@ async def my_event_handler(event):
         data_holder = dict()
 
         def reset():
-            writer = open('hits.txt', 'w')
-            writer.write()
+            writer = open('voot_hits.txt', 'w')
+            writer.write('voot checker by Zero Checkers\n')
             writer.close()
 
         def database(): # getting email and password from combo file
@@ -70,7 +70,7 @@ async def my_event_handler(event):
                 data_holder[email] = password
 
         def hits(hit): # saving the hits.
-            writer = open('hits.txt', 'a')
+            writer = open('voot_hits.txt', 'a')
             writer.write(hit)
             writer.close()
 
