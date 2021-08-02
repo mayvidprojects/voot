@@ -121,7 +121,7 @@ async def my_event_handler(event):
                     if status == "active":
                         expiry = str(checker['activeTillDate']['gmtDate'])
                         expiry = expiry[:expiry.find(':')-3]
-                        hitter = str(list(data_holder.keys())[count]) + str(list(data_holder.values())[count]) + '  ||  Expiry --> ' + expiry + '\n'
+                        hitter = str(list(data_holder.keys())[count]) + ':' +str(list(data_holder.values())[count]) + '  ||  Expiry --> ' + expiry + '\n'
                         print(hitter)
                         hits(hitter)
                 except:
